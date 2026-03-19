@@ -59,6 +59,25 @@ const Layout = () => {
             }}
           />
           <Tabs.Screen
+            name="challenges"
+            options={{
+              tabBarIcon: ({ color, focused }) => (
+                <View
+                  style={{
+                    width: 44,
+                    height: 44,
+                    borderRadius: 22,
+                    backgroundColor: focused ? Colors.tintcolor : Colors.grey,
+                    justifyContent: "center",
+                    alignItems: "center",
+                  }}
+                >
+                  <FontAwesome6 name="trophy" size={22} color={color} />
+                </View>
+              ),
+            }}
+          />
+          <Tabs.Screen
             name="profile"
             options={{
               tabBarIcon: ({ color, focused }) => (
