@@ -32,7 +32,7 @@ export default function LoginScreen() {
       setErro("");
       setLoading(true);
 
-      // FUTURO LOGIN FIREBASE
+      // FUTURO FIREBASE
       // await signInWithEmailAndPassword(auth, email, senha);
 
       router.replace("/(tabs)");
@@ -48,29 +48,19 @@ export default function LoginScreen() {
       <KeyboardAvoidingView
         style={styles.flex}
         behavior={Platform.OS === "ios" ? "padding" : "height"}
-        keyboardVerticalOffset={Platform.OS === "ios" ? 80 : 0}
       >
-        <ScrollView
-          contentContainerStyle={styles.scrollContainer}
-          keyboardShouldPersistTaps="handled"
-          showsVerticalScrollIndicator={false}
-        >
+        <ScrollView contentContainerStyle={styles.scrollContainer}>
           <View style={styles.container}>
-            <Text style={styles.logo}>Vai curintia</Text>
-            <Text style={styles.subtitle}>Santos e meu piru</Text>
+            <Text style={styles.logo}>Login</Text>
+            <Text style={styles.subtitle}>Entre na sua conta</Text>
 
             {/* EMAIL */}
             <View style={styles.inputContainer}>
-              <FontAwesome6
-                name="envelope"
-                size={18}
-                color="#888"
-                style={styles.icon}
-              />
+              <FontAwesome6 name="envelope" size={18} color="#94a3b8" />
               <TextInput
                 placeholder="E-mail"
-                placeholderTextColor="#888"
-                style={styles.inputWithIcon}
+                placeholderTextColor="#94a3b8"
+                style={styles.input}
                 value={email}
                 onChangeText={setEmail}
                 autoCapitalize="none"
@@ -80,16 +70,11 @@ export default function LoginScreen() {
 
             {/* SENHA */}
             <View style={styles.inputContainer}>
-              <FontAwesome6
-                name="lock"
-                size={18}
-                color="#888"
-                style={styles.icon}
-              />
+              <FontAwesome6 name="lock" size={18} color="#94a3b8" />
               <TextInput
                 placeholder="Senha"
-                placeholderTextColor="#888"
-                style={styles.inputWithIcon}
+                placeholderTextColor="#94a3b8"
+                style={styles.input}
                 secureTextEntry
                 value={senha}
                 onChangeText={setSenha}
@@ -124,77 +109,72 @@ const styles = StyleSheet.create({
   flex: {
     flex: 1,
   },
+
   safeArea: {
     flex: 1,
-    backgroundColor: "#f2f2f2",
+    backgroundColor: "#0f172a",
   },
+
   scrollContainer: {
     flexGrow: 1,
     justifyContent: "center",
-    paddingHorizontal: 25,
+    paddingHorizontal: 16,
   },
+
   container: {
     alignItems: "center",
   },
+
   logo: {
-    fontSize: 28,
+    fontSize: 26,
     fontWeight: "bold",
-    color: "#1726a8",
+    color: "#fff",
     marginBottom: 6,
   },
+
   subtitle: {
-    color: "#1726a8",
-    fontSize: 13,
+    color: "#94a3b8",
     marginBottom: 25,
     textAlign: "center",
   },
 
-  // NOVO INPUT COM ÍCONE
   inputContainer: {
     flexDirection: "row",
     alignItems: "center",
     width: "100%",
-    backgroundColor: "#fff",
+    backgroundColor: "#1e293b",
     borderRadius: 10,
-    borderWidth: 1,
-    borderColor: "#ddd",
-    marginBottom: 10,
     paddingHorizontal: 10,
+    marginBottom: 10,
   },
 
-  icon: {
-    marginRight: 8,
-  },
-
-  inputWithIcon: {
+  input: {
     flex: 1,
     padding: 12,
-    color: "#333",
+    color: "#fff",
   },
 
   error: {
-    color: "#cc2e2e",
-    textAlign: "center",
-    marginBottom: 8,
-    fontSize: 14,
+    color: "#ef4444",
+    marginBottom: 10,
   },
+
   button: {
-    backgroundColor: "#1726a8",
+    backgroundColor: "#971313",
     borderRadius: 10,
     width: "100%",
     paddingVertical: 14,
     marginTop: 10,
   },
+
   buttonText: {
     color: "#fff",
     textAlign: "center",
-    fontSize: 17,
     fontWeight: "bold",
   },
+
   link: {
-    color: "#1726a8",
-    marginTop: 18,
-    textDecorationLine: "underline",
-    fontSize: 14,
+    color: "#94a3b8",
+    marginTop: 15,
   },
 });

@@ -1,8 +1,11 @@
 import { useFonts } from "expo-font";
 import { Stack } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
-import { useEffect } from "react";
+import React, { useEffect } from "react";
 import "react-native-reanimated";
+
+import { PostProvider } from "@/context/PostContext";
+import { UserProvider } from "@/context/UserContext";
 
 SplashScreen.preventAutoHideAsync();
 
@@ -19,10 +22,16 @@ export default function RootLayout() {
 
   if (!fontsLoaded) return null;
 
+  // 🔒 Providers envolvem toda a app (auth + tabs)
   return (
-    <Stack screenOptions={{ headerShown: false }}>
-      <Stack.Screen name="login" />
-      <Stack.Screen name="(tabs)" />
-    </Stack>
+    <UserProvider>
+      <PostProvider>
+        <Stack screenOptions={{ headerShown: false }}>
+          <Stack.Screen name="login" />
+          <Stack.Screen name="register" /> {/* se você tiver register */}
+          <Stack.Screen name="(tabs)" />
+        </Stack>
+      </PostProvider>
+    </UserProvider>
   );
 }

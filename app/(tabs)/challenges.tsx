@@ -1,11 +1,11 @@
 import React, { useEffect, useRef, useState } from "react";
 import {
-    Animated,
-    FlatList,
-    StyleSheet,
-    Text,
-    TouchableOpacity,
-    View,
+  Animated,
+  FlatList,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
 } from "react-native";
 
 export default function Challenges() {
@@ -22,11 +22,16 @@ export default function Challenges() {
   const prevLevelRef = useRef(level);
 
   const [challenges, setChallenges] = useState([
-    { id: "1", title: "ir no jogo do curintia", xp: 50, done: false },
-    { id: "2", title: "secar o parmeira", xp: 100, done: false },
-    { id: "3", title: "faltar na ETEC", xp: 30, done: false },
-    { id: "4", title: "Votar no Bolsonaro", xp: 130, done: false },
-    { id: "5", title: "Ser hetero(normal)", xp: 190, done: false },
+    { id: "1", title: "Vai curintia", xp: 50, done: false },
+    { id: "2", title: "Bater no coleguinha", xp: 100, done: false },
+    { id: "3", title: "Platinar o Goat Souls 2", xp: 30, done: false },
+    {
+      id: "4",
+      title: "Chorar na morte do Arthur morgan",
+      xp: 130,
+      done: false,
+    },
+    { id: "5", title: "Assitir Videos do Monark", xp: 190, done: false },
   ]);
 
   const handleComplete = (id: string) => {
@@ -68,7 +73,6 @@ export default function Challenges() {
     outputRange: [1, 0],
   });
 
-  // 🚀 LEVEL UP DETECT
   useEffect(() => {
     if (level > prevLevelRef.current) {
       setShowLevelUp(true);
@@ -86,7 +90,6 @@ export default function Challenges() {
     prevLevelRef.current = level;
   }, [level]);
 
-  // 🚀 ANIMATIONS
   const rocketTranslate = levelAnim.interpolate({
     inputRange: [0, 1],
     outputRange: [100, -200],
@@ -277,7 +280,7 @@ const styles = StyleSheet.create({
   },
 
   button: {
-    backgroundColor: "#22c55e",
+    backgroundColor: "#971313",
     padding: 8,
     borderRadius: 8,
   },

@@ -1,6 +1,6 @@
 import { Ionicons } from "@expo/vector-icons";
 import * as ImagePicker from "expo-image-picker";
-import React, { useState } from "react";
+import React, { useContext, useState } from "react";
 import {
   Alert,
   Animated,
@@ -13,11 +13,21 @@ import {
   View,
 } from "react-native";
 
+import { PostContext } from "../../context/PostContext"; // ✅ IMPORT QUE FALTAVA
+
 export default function Index() {
   const [postText, setPostText] = useState("");
-  const [posts, setPosts] = useState<any[]>([]);
   const [image, setImage] = useState<string | null>(null);
   const progress = useState(new Animated.Value(0))[0];
+
+  const context = useContext(PostContext);
+
+  // 🧠 proteção contra undefined (evita crash silencioso)
+  if (!context) {
+    throw new Error("PostContext não encontrado. Verifica o Provider.");
+  }
+
+  const { posts, addPost } = context;
 
   const handleAddImage = async () => {
     const permission = await ImagePicker.requestMediaLibraryPermissionsAsync();
@@ -47,7 +57,8 @@ export default function Index() {
       image: image,
     };
 
-    setPosts([newPost, ...posts]);
+    addPost(newPost);
+
     setPostText("");
     setImage(null);
 
@@ -105,6 +116,7 @@ export default function Index() {
             {item.text ? (
               <Text style={styles.postText}>{item.text}</Text>
             ) : null}
+
             {item.image && (
               <Image source={{ uri: item.image }} style={styles.image} />
             )}
@@ -158,7 +170,7 @@ const styles = StyleSheet.create({
     borderRadius: 50,
   },
   buttonPrimary: {
-    backgroundColor: "#22c55e",
+    backgroundColor: "#971313",
     padding: 10,
     borderRadius: 8,
   },
@@ -175,7 +187,7 @@ const styles = StyleSheet.create({
   },
   progressBar: {
     height: "100%",
-    backgroundColor: "#22c55e",
+    backgroundColor: "#971313",
   },
   post: {
     backgroundColor: "#1e293b",

@@ -18,27 +18,16 @@ export default function Profile() {
   const [image, setImage] = useState<string | null>(null);
   const [isEditing, setIsEditing] = useState(false);
 
-  // MOCK de posts do usuário (depois vem do Firebase)
   const [posts] = useState([
-    {
-      id: "1",
-      image: "https://via.placeholder.com/300",
-    },
-    {
-      id: "2",
-      image: "https://via.placeholder.com/300",
-    },
-    {
-      id: "3",
-      image: "https://via.placeholder.com/300",
-    },
+    { id: "1", image: "https://via.placeholder.com/300" },
+    { id: "2", image: "https://via.placeholder.com/300" },
+    { id: "3", image: "https://via.placeholder.com/300" },
   ]);
 
   const handlePickImage = async () => {
     if (!isEditing) return;
 
     const permission = await ImagePicker.requestMediaLibraryPermissionsAsync();
-
     if (!permission.granted) {
       Alert.alert("Permissão necessária", "Precisamos acessar sua galeria.");
       return;
@@ -50,14 +39,16 @@ export default function Profile() {
       quality: 1,
     });
 
-    if (!result.canceled) {
-      setImage(result.assets[0].uri);
-    }
+    if (!result.canceled) setImage(result.assets[0].uri);
   };
 
   const handleSave = () => {
     setIsEditing(false);
-    Alert.alert("Salvo!", "Perfil salvo (mock).");
+    Alert.alert("Salvo", "Perfil atualizado (mock).");
+  };
+
+  const handleLogout = () => {
+    Alert.alert("Logout", "Você saiu da conta (mock).");
   };
 
   return (
@@ -67,22 +58,22 @@ export default function Profile() {
           <>
             <View style={styles.header}>
               <Text style={styles.title}>Perfil</Text>
-
-              <TouchableOpacity
-                onPress={() => {
-                  if (isEditing) {
-                    handleSave();
-                  } else {
-                    setIsEditing(true);
+              <View style={styles.headerButtons}>
+                <TouchableOpacity onPress={handleLogout}>
+                  <Ionicons name="log-out-outline" size={24} color="#ef4444" />
+                </TouchableOpacity>
+                <TouchableOpacity
+                  onPress={() =>
+                    isEditing ? handleSave() : setIsEditing(true)
                   }
-                }}
-              >
-                <Ionicons
-                  name={isEditing ? "checkmark" : "create-outline"}
-                  size={24}
-                  color="#fff"
-                />
-              </TouchableOpacity>
+                >
+                  <Ionicons
+                    name={isEditing ? "checkmark" : "create-outline"}
+                    size={24}
+                    color="#fff"
+                  />
+                </TouchableOpacity>
+              </View>
             </View>
 
             <View style={styles.profileContainer}>
@@ -104,7 +95,6 @@ export default function Profile() {
 
               <TextInput
                 placeholder="Seu nome"
-                placeholderTextColor="#94a3b8"
                 value={name}
                 onChangeText={setName}
                 style={styles.input}
@@ -113,7 +103,6 @@ export default function Profile() {
 
               <TextInput
                 placeholder="Sua descrição"
-                placeholderTextColor="#94a3b8"
                 value={bio}
                 onChangeText={setBio}
                 style={[styles.input, styles.textArea]}
@@ -137,32 +126,17 @@ export default function Profile() {
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: "#0f172a",
-    padding: 10,
-  },
+  container: { flex: 1, backgroundColor: "#0f172a", padding: 10 },
   header: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
     marginBottom: 20,
-    paddingHorizontal: 6,
   },
-  title: {
-    color: "#fff",
-    fontSize: 22,
-    fontWeight: "bold",
-  },
-  profileContainer: {
-    alignItems: "center",
-  },
-  avatar: {
-    width: 120,
-    height: 120,
-    borderRadius: 60,
-    marginBottom: 15,
-  },
+  headerButtons: { flexDirection: "row", gap: 15 },
+  title: { color: "#fff", fontSize: 22, fontWeight: "bold" },
+  profileContainer: { alignItems: "center" },
+  avatar: { width: 120, height: 120, borderRadius: 60, marginBottom: 15 },
   avatarPlaceholder: {
     width: 120,
     height: 120,
@@ -174,8 +148,8 @@ const styles = StyleSheet.create({
   },
   editIcon: {
     position: "absolute",
-    bottom: 15,
-    right: 5,
+    bottom: 0,
+    right: 0,
     backgroundColor: "#3b82f6",
     padding: 6,
     borderRadius: 20,
@@ -188,10 +162,7 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     marginBottom: 10,
   },
-  textArea: {
-    height: 80,
-    textAlignVertical: "top",
-  },
+  textArea: { height: 80, textAlignVertical: "top" },
   sectionTitle: {
     color: "#fff",
     fontSize: 18,
@@ -200,9 +171,5 @@ const styles = StyleSheet.create({
     marginBottom: 10,
     alignSelf: "flex-start",
   },
-  gridImage: {
-    width: "33%",
-    aspectRatio: 1,
-    padding: 2,
-  },
+  gridImage: { width: "33%", aspectRatio: 1, padding: 2 },
 });
