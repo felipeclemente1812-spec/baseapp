@@ -1,3 +1,4 @@
+import { LinearGradient } from "expo-linear-gradient";
 import React, { useEffect, useRef, useState } from "react";
 import {
   Animated,
@@ -22,16 +23,10 @@ export default function Challenges() {
   const prevLevelRef = useRef(level);
 
   const [challenges, setChallenges] = useState([
-    { id: "1", title: "Vai curintia", xp: 50, done: false },
-    { id: "2", title: "Bater no coleguinha", xp: 100, done: false },
-    { id: "3", title: "Platinar o Goat Souls 2", xp: 30, done: false },
-    {
-      id: "4",
-      title: "Chorar na morte do Arthur morgan",
-      xp: 130,
-      done: false,
-    },
-    { id: "5", title: "Assitir Videos do Monark", xp: 190, done: false },
+    { id: "1", title: "Postar algo", xp: 50, done: false },
+    { id: "2", title: "Ganhar 5 likes", xp: 100, done: false },
+    { id: "3", title: "Comparar 3 posts", xp: 80, done: false },
+    { id: "4", title: "Logar 3 dias seguidos", xp: 120, done: false },
   ]);
 
   const handleComplete = (id: string) => {
@@ -50,22 +45,18 @@ export default function Challenges() {
       setXpText("");
     });
 
-    const updated = challenges.map((c) =>
-      c.id === id ? { ...c, done: true } : c,
+    setChallenges((prev) =>
+      prev.map((c) => (c.id === id ? { ...c, done: true } : c))
     );
-
-    setChallenges(updated);
   };
 
-  // 🧠 LEVEL SYSTEM
   const currentXp = xp % XP_PER_LEVEL;
   const xpToNext = XP_PER_LEVEL - currentXp;
   const progress = (currentXp / XP_PER_LEVEL) * 100;
 
-  // 🎬 XP ANIMATION
   const translateY = xpAnim.interpolate({
     inputRange: [0, 1],
-    outputRange: [0, -30],
+    outputRange: [0, -25],
   });
 
   const opacity = xpAnim.interpolate({
@@ -79,7 +70,7 @@ export default function Challenges() {
 
       Animated.timing(levelAnim, {
         toValue: 1,
-        duration: 2500,
+        duration: 2000,
         useNativeDriver: true,
       }).start(() => {
         levelAnim.setValue(0);
@@ -90,110 +81,75 @@ export default function Challenges() {
     prevLevelRef.current = level;
   }, [level]);
 
-  const rocketTranslate = levelAnim.interpolate({
-    inputRange: [0, 1],
-    outputRange: [100, -200],
-  });
-
-  const confettiFall = levelAnim.interpolate({
-    inputRange: [0, 1],
-    outputRange: [-50, 300],
-  });
-
-  const fadeOut = levelAnim.interpolate({
-    inputRange: [0, 0.8, 1],
-    outputRange: [1, 1, 0],
-  });
-
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Desafios</Text>
+      {/* HEADER */}
+      <LinearGradient
+        colors={["#5b21b6", "#1e1b4b"]}
+        style={styles.header}
+      >
+        <Text style={styles.title}>Desafios</Text>
 
-      <View style={styles.card}>
-        <View style={styles.levelRow}>
-          <Text style={styles.levelText}>LVL {level}</Text>
-          <Text style={styles.xpText}>
+        <View style={styles.levelCard}>
+          <Text style={styles.level}>Nível {level}</Text>
+
+          <Text style={styles.progressText}>
             {currentXp} / {XP_PER_LEVEL} XP
           </Text>
+
+          <View style={styles.progressBarBg}>
+            <View style={[styles.progressBar, { width: `${progress}%` }]} />
+          </View>
+
+          <Text style={styles.next}>
+            Faltam {xpToNext} XP
+          </Text>
+
+          {xpText !== "" && (
+            <Animated.Text
+              style={[
+                styles.xpFloating,
+                { transform: [{ translateY }], opacity },
+              ]}
+            >
+              {xpText}
+            </Animated.Text>
+          )}
         </View>
+      </LinearGradient>
 
-        <Text style={styles.nextLevel}>
-          Faltam {xpToNext} XP para o próximo nível
-        </Text>
-
-        {xpText !== "" && (
-          <Animated.Text
-            style={[
-              styles.xpFloating,
-              {
-                transform: [{ translateY }],
-                opacity,
-              },
-            ]}
-          >
-            {xpText}
-          </Animated.Text>
-        )}
-
-        <View style={styles.progressBarBackground}>
-          <View style={[styles.progressBar, { width: `${progress}%` }]} />
-        </View>
-      </View>
-
+      {/* LISTA */}
       <FlatList
+        contentContainerStyle={{ padding: 16 }}
         data={challenges}
         keyExtractor={(item) => item.id}
         renderItem={({ item }) => (
           <View style={styles.challenge}>
             <View>
-              <Text style={styles.challengeText}>{item.title}</Text>
+              <Text style={styles.challengeTitle}>{item.title}</Text>
               <Text style={styles.challengeXp}>+{item.xp} XP</Text>
             </View>
 
             <TouchableOpacity
               style={[
                 styles.button,
-                item.done && { backgroundColor: "#475569" },
+                item.done && styles.buttonDone,
               ]}
               onPress={() => handleComplete(item.id)}
               disabled={item.done}
             >
               <Text style={styles.buttonText}>
-                {item.done ? "Feito" : "Completar"}
+                {item.done ? "Concluído" : "Fazer"}
               </Text>
             </TouchableOpacity>
           </View>
         )}
       />
 
-      {/* 🚀 LEVEL UP EFFECT */}
+      {/* LEVEL UP */}
       {showLevelUp && (
         <View style={styles.overlay}>
-          <Animated.Text
-            style={[
-              styles.rocket,
-              {
-                transform: [{ translateY: rocketTranslate }],
-                opacity: fadeOut,
-              },
-            ]}
-          >
-            🚀
-          </Animated.Text>
-
-          {[...Array(12)].map((_, i) => (
-            <Animated.View
-              key={i}
-              style={[
-                styles.confetti,
-                {
-                  left: Math.random() * 300,
-                  transform: [{ translateY: confettiFall }],
-                  opacity: fadeOut,
-                },
-              ]}
-            />
-          ))}
+          <Text style={styles.levelUp}>LEVEL UP 🚀</Text>
         </View>
       )}
     </View>
@@ -201,78 +157,78 @@ export default function Challenges() {
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: "#0f172a",
-    padding: 16,
+  container: { flex: 1, backgroundColor: "#0f172a" },
+
+  header: {
+    paddingTop: 50,
+    paddingBottom: 20,
+    paddingHorizontal: 16,
+    borderBottomLeftRadius: 25,
+    borderBottomRightRadius: 25,
   },
 
   title: {
     color: "#fff",
     fontSize: 22,
-    fontWeight: "bold",
+    fontWeight: "600",
     marginBottom: 12,
   },
 
-  card: {
-    backgroundColor: "#1e293b",
-    borderRadius: 12,
-    padding: 12,
-    marginBottom: 16,
+  levelCard: {
+    backgroundColor: "rgba(255,255,255,0.08)",
+    padding: 14,
+    borderRadius: 16,
   },
 
-  levelRow: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-  },
-
-  levelText: {
-    color: "#22c55e",
-    fontWeight: "bold",
-  },
-
-  xpText: {
+  level: {
     color: "#fff",
+    fontSize: 18,
+    fontWeight: "600",
   },
 
-  nextLevel: {
-    color: "#94a3b8",
-    fontSize: 12,
-    marginBottom: 8,
+  progressText: {
+    color: "#cbd5f5",
+    fontSize: 13,
+    marginTop: 2,
   },
 
-  xpFloating: {
-    position: "absolute",
-    right: 16,
-    top: 10,
-    color: "#22c55e",
-    fontWeight: "bold",
-  },
-
-  progressBarBackground: {
-    height: 6,
+  progressBarBg: {
+    height: 8,
     backgroundColor: "#334155",
     borderRadius: 10,
+    marginTop: 10,
     overflow: "hidden",
   },
 
   progressBar: {
     height: "100%",
-    backgroundColor: "#22c55e",
+    backgroundColor: "#6366f1",
+  },
+
+  next: {
+    color: "#94a3b8",
+    fontSize: 12,
+    marginTop: 6,
+  },
+
+  xpFloating: {
+    position: "absolute",
+    right: 10,
+    top: 10,
+    color: "#22c55e",
+    fontWeight: "bold",
   },
 
   challenge: {
     backgroundColor: "#1e293b",
-    padding: 12,
-    borderRadius: 10,
+    padding: 14,
+    borderRadius: 14,
     marginBottom: 10,
     flexDirection: "row",
     justifyContent: "space-between",
   },
 
-  challengeText: {
-    color: "#fff",
-  },
+  challengeTitle: { color: "#fff" },
 
   challengeXp: {
     color: "#94a3b8",
@@ -280,36 +236,32 @@ const styles = StyleSheet.create({
   },
 
   button: {
-    backgroundColor: "#971313",
-    padding: 8,
-    borderRadius: 8,
+    backgroundColor: "#6366f1",
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 10,
+  },
+
+  buttonDone: {
+    backgroundColor: "#475569",
   },
 
   buttonText: {
     color: "#fff",
-    fontWeight: "bold",
+    fontWeight: "600",
   },
 
   overlay: {
     position: "absolute",
     width: "100%",
     height: "100%",
-    pointerEvents: "none",
+    justifyContent: "center",
+    alignItems: "center",
   },
 
-  rocket: {
-    position: "absolute",
-    bottom: 0,
-    alignSelf: "center",
-    fontSize: 40,
-  },
-
-  confetti: {
-    position: "absolute",
-    top: 0,
-    width: 6,
-    height: 6,
-    backgroundColor: "#22c55e",
-    borderRadius: 2,
+  levelUp: {
+    fontSize: 28,
+    color: "#fff",
+    fontWeight: "bold",
   },
 });

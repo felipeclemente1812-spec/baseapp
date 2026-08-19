@@ -1,112 +1,142 @@
-import Colors from "@/constants/Colors";
 import { FontAwesome, FontAwesome6 } from "@expo/vector-icons";
+import { LinearGradient } from "expo-linear-gradient";
 import { Tabs } from "expo-router";
 import { StatusBar } from "expo-status-bar";
-import React from "react";
 import { Platform, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 import { PostProvider } from "../../context/PostContext";
 import { UserProvider } from "../../context/UserContext";
 
+const TabIcon = ({ focused, children }: any) => {
+  return (
+    <View
+      style={{
+        width: 46,
+        height: 46,
+        borderRadius: 23,
+        justifyContent: "center",
+        alignItems: "center",
+        backgroundColor: focused
+          ? "rgba(255,255,255,0.15)"
+          : "transparent",
+      }}
+    >
+      <View
+        style={{
+          transform: [{ scale: focused ? 1.1 : 1 }],
+        }}
+      >
+        {children}
+      </View>
+    </View>
+  );
+};
+
 const Layout = () => {
   return (
     <UserProvider>
       <PostProvider>
-        <SafeAreaView style={{ flex: 1, backgroundColor: Colors.background }}>
+        <SafeAreaView style={{ flex: 1, backgroundColor: "#0f172a" }}>
           <Tabs
             screenOptions={{
+              headerShown: false,
+              tabBarShowLabel: false,
+
+              // 🔴 ESSENCIAL PRA CENTRALIZAR
+              tabBarItemStyle: {
+                flex: 1,
+                height: 65,
+                justifyContent: "center",
+                alignItems: "center",
+                paddingVertical: 0,
+                paddingHorizontal: 0,
+              },
+
               tabBarStyle: {
-                backgroundColor: Colors.grey,
                 position: "absolute",
                 bottom: Platform.OS === "ios" ? 20 : 15,
-                left: 60,
-                right: 60,
-                height: 55,
-                borderRadius: 40,
-                borderWidth: 2,
-                borderColor: Colors.tintcolor,
+                left: 40,
+                right: 40,
+                height: 65,
+                borderRadius: 30,
+                overflow: "hidden",
+                backgroundColor: "transparent",
+                borderTopWidth: 0,
+                elevation: 0,
+                display: "flex",
                 flexDirection: "row",
                 justifyContent: "space-around",
                 alignItems: "center",
-                shadowColor: "#000",
-                shadowOpacity: 0.25,
-                shadowOffset: { width: 0, height: 3 },
-                shadowRadius: 6,
-                elevation: 8,
-                zIndex: 999,
+                width: undefined,
               },
-              tabBarShowLabel: false,
-              tabBarInactiveTintColor: "#000000ff",
-              tabBarActiveTintColor: "#000000ff",
-              headerShown: false,
+
+              tabBarBackground: () => (
+                <LinearGradient
+                  colors={["#5b21b6", "#1e1b4b"]}
+                  start={{ x: 0, y: 0 }}
+                  end={{ x: 1, y: 1 }}
+                  style={{
+                    flex: 1,
+                    borderRadius: 30,
+                  }}
+                />
+              ),
             }}
           >
+            {/* HOME */}
             <Tabs.Screen
               name="index"
               options={{
-                tabBarIcon: ({ color, focused }) => (
-                  <View
-                    style={{
-                      width: 44,
-                      height: 44,
-                      borderRadius: 22,
-                      backgroundColor: focused ? Colors.tintcolor : Colors.grey,
-                      justifyContent: "center",
-                      alignItems: "center",
-                    }}
-                  >
+                tabBarIcon: ({ focused }) => (
+                  <TabIcon focused={focused}>
                     <FontAwesome6
                       name="house-chimney"
-                      size={22}
-                      color={color}
+                      size={20}
+                      color="#fff"
+                      style={{ opacity: focused ? 1 : 0.7 }}
                     />
-                  </View>
+                  </TabIcon>
                 ),
               }}
             />
 
+            {/* CHALLENGES */}
             <Tabs.Screen
               name="challenges"
               options={{
-                tabBarIcon: ({ color, focused }) => (
-                  <View
-                    style={{
-                      width: 44,
-                      height: 44,
-                      borderRadius: 22,
-                      backgroundColor: focused ? Colors.tintcolor : Colors.grey,
-                      justifyContent: "center",
-                      alignItems: "center",
-                    }}
-                  >
-                    <FontAwesome6 name="trophy" size={22} color={color} />
-                  </View>
+                tabBarIcon: ({ focused }) => (
+                  <TabIcon focused={focused}>
+                    <FontAwesome6
+                      name="trophy"
+                      size={20}
+                      color="#fff"
+                      style={{ opacity: focused ? 1 : 0.7 }}
+                    />
+                  </TabIcon>
                 ),
               }}
             />
 
+            {/* PROFILE */}
             <Tabs.Screen
               name="profile"
               options={{
-                tabBarIcon: ({ color, focused }) => (
-                  <View
-                    style={{
-                      width: 44,
-                      height: 44,
-                      borderRadius: 22,
-                      backgroundColor: focused ? Colors.tintcolor : Colors.grey,
-                      justifyContent: "center",
-                      alignItems: "center",
-                    }}
-                  >
-                    <FontAwesome name="user" size={22} color={color} />
-                  </View>
+                tabBarIcon: ({ focused }) => (
+                  <TabIcon focused={focused}>
+                    <FontAwesome
+                      name="user"
+                      size={20}
+                      color="#fff"
+                      style={{ opacity: focused ? 1 : 0.7 }}
+                    />
+                  </TabIcon>
                 ),
               }}
             />
           </Tabs>
         </SafeAreaView>
+
         <StatusBar style="light" />
       </PostProvider>
     </UserProvider>

@@ -1,6 +1,7 @@
 import { Ionicons } from "@expo/vector-icons";
 import * as ImagePicker from "expo-image-picker";
-import React, { useContext, useState } from "react";
+import { LinearGradient } from "expo-linear-gradient";
+import { useContext, useState } from "react";
 import {
   Alert,
   Animated,
@@ -13,7 +14,7 @@ import {
   View,
 } from "react-native";
 
-import { PostContext } from "../../context/PostContext"; // ✅ IMPORT QUE FALTAVA
+import { PostContext } from "../../context/PostContext";
 
 export default function Index() {
   const [postText, setPostText] = useState("");
@@ -21,24 +22,18 @@ export default function Index() {
   const progress = useState(new Animated.Value(0))[0];
 
   const context = useContext(PostContext);
-
-  // 🧠 proteção contra undefined (evita crash silencioso)
-  if (!context) {
-    throw new Error("PostContext não encontrado. Verifica o Provider.");
-  }
+  if (!context) throw new Error("PostContext não encontrado");
 
   const { posts, addPost } = context;
 
   const handleAddImage = async () => {
     const permission = await ImagePicker.requestMediaLibraryPermissionsAsync();
-
     if (!permission.granted) {
-      Alert.alert("Permissão necessária", "Precisamos de acesso à galeria.");
+      Alert.alert("Permissão necessária");
       return;
     }
 
     const result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ImagePicker.MediaTypeOptions.Images,
       allowsEditing: true,
       quality: 1,
     });
@@ -51,24 +46,20 @@ export default function Index() {
   const handlePost = () => {
     if (!postText && !image) return;
 
-    const newPost = {
+    addPost({
       id: Date.now().toString(),
       text: postText,
-      image: image,
-    };
-
-    addPost(newPost);
+      image,
+    });
 
     setPostText("");
     setImage(null);
 
     Animated.timing(progress, {
       toValue: 1,
-      duration: 500,
+      duration: 400,
       useNativeDriver: false,
-    }).start(() => {
-      progress.setValue(0);
-    });
+    }).start(() => progress.setValue(0));
   };
 
   const progressWidth = progress.interpolate({
@@ -78,8 +69,15 @@ export default function Index() {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Meu App Base</Text>
+      {/* HEADER */}
+      <LinearGradient
+        colors={["#5b21b6", "#1e1b4b"]}
+        style={styles.header}
+      >
+        <Text style={styles.title}>Feed</Text>
+      </LinearGradient>
 
+      {/* CARD POST */}
       <View style={styles.card}>
         <TextInput
           placeholder="O que você está pensando?"
@@ -87,28 +85,36 @@ export default function Index() {
           value={postText}
           onChangeText={setPostText}
           style={styles.input}
+          multiline
         />
 
-        {image && <Image source={{ uri: image }} style={styles.previewImage} />}
+        {image && (
+          <Image source={{ uri: image }} style={styles.previewImage} />
+        )}
 
         <View style={styles.actions}>
-          <TouchableOpacity style={styles.iconButton} onPress={handleAddImage}>
-            <Ionicons name="image" size={22} color="#fff" />
+          <TouchableOpacity
+            style={styles.iconButton}
+            onPress={handleAddImage}
+          >
+            <Ionicons name="image" size={20} color="#fff" />
           </TouchableOpacity>
 
-          <TouchableOpacity style={styles.buttonPrimary} onPress={handlePost}>
+          <TouchableOpacity style={styles.button} onPress={handlePost}>
             <Text style={styles.buttonText}>Postar</Text>
           </TouchableOpacity>
         </View>
 
-        <View style={styles.progressBarBackground}>
+        <View style={styles.progressBg}>
           <Animated.View
-            style={[styles.progressBar, { width: progressWidth }]}
+            style={[styles.progress, { width: progressWidth }]}
           />
         </View>
       </View>
 
+      {/* LISTA */}
       <FlatList
+        contentContainerStyle={{ padding: 16 }}
         data={posts}
         keyExtractor={(item) => item.id}
         renderItem={({ item }) => (
@@ -131,78 +137,97 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: "#0f172a",
-    padding: 16,
   },
+
+  header: {
+    paddingTop: 50,
+    paddingBottom: 15,
+    paddingHorizontal: 16,
+    borderBottomLeftRadius: 20,
+    borderBottomRightRadius: 20,
+  },
+
   title: {
     color: "#fff",
-    fontSize: 22,
-    fontWeight: "bold",
-    marginBottom: 12,
+    fontSize: 20,
+    fontWeight: "600",
   },
+
   card: {
-    backgroundColor: "#1e293b",
-    borderRadius: 12,
+    margin: 16,
+    backgroundColor: "rgba(255,255,255,0.05)",
+    borderRadius: 16,
     padding: 12,
-    marginBottom: 16,
   },
+
   input: {
-    backgroundColor: "#334155",
     color: "#fff",
     padding: 10,
-    borderRadius: 8,
+    borderRadius: 12,
+    backgroundColor: "rgba(255,255,255,0.08)",
     marginBottom: 10,
+    minHeight: 50,
   },
+
   previewImage: {
     width: "100%",
     height: 200,
-    borderRadius: 10,
+    borderRadius: 12,
     marginBottom: 10,
-    resizeMode: "cover",
   },
+
   actions: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
   },
+
   iconButton: {
-    backgroundColor: "#3b82f6",
+    backgroundColor: "#334155",
     padding: 10,
-    borderRadius: 50,
+    borderRadius: 20,
   },
-  buttonPrimary: {
-    backgroundColor: "#971313",
-    padding: 10,
-    borderRadius: 8,
+
+  button: {
+    backgroundColor: "#6366f1",
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    borderRadius: 12,
   },
+
   buttonText: {
     color: "#fff",
-    fontWeight: "bold",
+    fontWeight: "600",
   },
-  progressBarBackground: {
-    height: 6,
-    backgroundColor: "#334155",
+
+  progressBg: {
+    height: 5,
+    backgroundColor: "#1e293b",
     borderRadius: 10,
     marginTop: 10,
     overflow: "hidden",
   },
-  progressBar: {
+
+  progress: {
     height: "100%",
-    backgroundColor: "#971313",
+    backgroundColor: "#6366f1",
   },
+
   post: {
     backgroundColor: "#1e293b",
+    borderRadius: 14,
     padding: 12,
-    borderRadius: 10,
-    marginBottom: 10,
+    marginBottom: 12,
   },
+
   postText: {
-    color: "#fff",
+    color: "#e2e8f0",
     marginBottom: 8,
   },
+
   image: {
     width: "100%",
-    height: 250,
-    borderRadius: 10,
-    resizeMode: "cover",
+    height: 240,
+    borderRadius: 12,
   },
 });

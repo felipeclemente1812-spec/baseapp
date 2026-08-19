@@ -1,5 +1,8 @@
 import { FontAwesome6 } from "@expo/vector-icons";
+import { LinearGradient } from "expo-linear-gradient";
 import { useRouter } from "expo-router";
+import { createUserWithEmailAndPassword } from "firebase/auth";
+import { doc, setDoc } from "firebase/firestore";
 import React, { useContext, useState } from "react";
 import {
   ActivityIndicator,
@@ -14,6 +17,8 @@ import {
   View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+
+import { auth, db } from "@/config/firebase";
 
 import { UserContext } from "@/context/UserContext";
 
@@ -41,7 +46,6 @@ export default function RegisterScreen() {
     /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*#?&]).{8,}$/.test(senha);
 
   const handleRegister = async () => {
-    // 🔴 valida antes de salvar (óbvio, mas aparentemente necessário falar)
     if (!nome || !email || !senha) {
       Alert.alert("Erro", "Preencha todos os campos!");
       return;
@@ -63,117 +67,152 @@ export default function RegisterScreen() {
     try {
       setLoading(true);
 
-      // ✅ AGORA SIM salva certo
-      updateUser({
+      const userCredential = await createUserWithEmailAndPassword(
+        auth,
+        email,
+        senha,
+      );
+
+      const user = userCredential.user;
+
+      await setDoc(doc(db, "users", user.uid), {
         name: nome,
+        email: email,
+        bio: "",
+        createdAt: new Date(),
+      });
+
+      updateUser({
+        uid: user.uid,
+        name: nome,
+        email: email,
+        bio: "",
       });
 
       Alert.alert("Sucesso", "Conta criada!");
+
       router.replace("/(tabs)");
-    } catch (error) {
-      Alert.alert("Erro", "Não foi possível criar a conta.");
+    } catch (error: any) {
+      console.log(error);
+
+      if (error.code === "auth/email-already-in-use") {
+        Alert.alert("Erro", "Este e-mail já está cadastrado.");
+      } else if (error.code === "auth/invalid-email") {
+        Alert.alert("Erro", "E-mail inválido.");
+      } else if (error.code === "auth/weak-password") {
+        Alert.alert("Erro", "A senha é muito fraca.");
+      } else {
+        Alert.alert("Erro", "Não foi possível criar a conta.");
+      }
     } finally {
       setLoading(false);
     }
   };
-
   return (
     <SafeAreaView style={styles.safeArea}>
-      <KeyboardAvoidingView
-        style={styles.flex}
-        behavior={Platform.OS === "ios" ? "padding" : "height"}
+      <LinearGradient
+        colors={["#5b21b6", "#1e1b4b"]}
+        start={{ x: 0, y: 0 }}
+        end={{ x: 1, y: 1 }}
+        style={styles.gradient}
       >
-        <ScrollView contentContainerStyle={styles.scrollContainer}>
-          <View style={styles.container}>
-            <Text style={styles.logo}>Cadastro</Text>
-            <Text style={styles.subtitle}>Crie sua conta</Text>
+        <KeyboardAvoidingView
+          style={styles.flex}
+          behavior={Platform.OS === "ios" ? "padding" : "height"}
+        >
+          <ScrollView contentContainerStyle={styles.scrollContainer}>
+            <View style={styles.container}>
+              <Text style={styles.logo}>Cadastro</Text>
+              <Text style={styles.subtitle}>Crie sua conta</Text>
 
-            {/* NOME */}
-            <View style={styles.inputContainer}>
-              <FontAwesome6 name="user" size={18} color="#94a3b8" />
-              <TextInput
-                placeholder="Nome Completo"
-                placeholderTextColor="#94a3b8"
-                style={styles.input}
-                value={nome}
-                onChangeText={setNome}
-              />
-            </View>
+              {/* NOME */}
+              <View style={styles.inputContainer}>
+                <FontAwesome6 name="user" size={16} color="#cbd5f5" />
+                <TextInput
+                  placeholder="Nome completo"
+                  placeholderTextColor="#cbd5f5"
+                  style={styles.input}
+                  value={nome}
+                  onChangeText={setNome}
+                />
+              </View>
 
-            {/* EMAIL */}
-            <View style={styles.inputContainer}>
-              <FontAwesome6 name="envelope" size={18} color="#94a3b8" />
-              <TextInput
-                placeholder="E-mail"
-                placeholderTextColor="#94a3b8"
-                style={styles.input}
-                value={email}
-                autoCapitalize="none"
-                onChangeText={(text) => {
-                  setEmail(text);
-                  setEmailValido(validarEmail(text));
-                }}
-              />
-            </View>
+              {/* EMAIL */}
+              <View style={styles.inputContainer}>
+                <FontAwesome6 name="envelope" size={16} color="#cbd5f5" />
+                <TextInput
+                  placeholder="E-mail"
+                  placeholderTextColor="#cbd5f5"
+                  style={styles.input}
+                  value={email}
+                  autoCapitalize="none"
+                  onChangeText={(text) => {
+                    setEmail(text);
+                    setEmailValido(validarEmail(text));
+                  }}
+                />
+              </View>
 
-            {email.length > 0 && (
-              <Text
-                style={[
-                  styles.feedback,
-                  { color: emailValido ? "#3b82f6" : "#ef4444" },
-                ]}
-              >
-                {emailValido ? "E-mail válido" : "E-mail inválido"}
-              </Text>
-            )}
-
-            {/* SENHA */}
-            <View style={styles.inputContainer}>
-              <FontAwesome6 name="lock" size={18} color="#94a3b8" />
-              <TextInput
-                placeholder="Senha"
-                placeholderTextColor="#94a3b8"
-                style={styles.input}
-                secureTextEntry
-                value={senha}
-                onChangeText={(text) => {
-                  setSenha(text);
-                  setSenhaValida(validarSenha(text));
-                }}
-              />
-            </View>
-
-            {senha.length > 0 && (
-              <Text
-                style={[
-                  styles.feedback,
-                  { color: senhaValida ? "#3b82f6" : "#ef4444" },
-                ]}
-              >
-                {senhaValida
-                  ? "Senha forte"
-                  : "8+ caracteres, maiúscula, minúscula, número e símbolo"}
-              </Text>
-            )}
-
-            <TouchableOpacity
-              style={styles.button}
-              onPress={handleRegister}
-              disabled={loading}
-            >
-              {loading ? (
-                <ActivityIndicator color="#fff" />
-              ) : (
-                <Text style={styles.buttonText}>CRIAR CONTA</Text>
+              {email.length > 0 && (
+                <Text
+                  style={[
+                    styles.feedback,
+                    { color: emailValido ? "#22c55e" : "#f87171" },
+                  ]}
+                >
+                  {emailValido ? "E-mail válido" : "E-mail inválido"}
+                </Text>
               )}
-            </TouchableOpacity>
 
-            <TouchableOpacity onPress={() => router.back()}>
-              <Text style={styles.link}>Já tem conta? Entrar</Text>
-            </TouchableOpacity>
-          </View>
-        </ScrollView>
-      </KeyboardAvoidingView>
+              {/* SENHA */}
+              <View style={styles.inputContainer}>
+                <FontAwesome6 name="lock" size={16} color="#cbd5f5" />
+                <TextInput
+                  placeholder="Senha"
+                  placeholderTextColor="#cbd5f5"
+                  style={styles.input}
+                  secureTextEntry
+                  value={senha}
+                  onChangeText={(text) => {
+                    setSenha(text);
+                    setSenhaValida(validarSenha(text));
+                  }}
+                />
+              </View>
+
+              {senha.length > 0 && (
+                <Text
+                  style={[
+                    styles.feedback,
+                    { color: senhaValida ? "#22c55e" : "#f87171" },
+                  ]}
+                >
+                  {senhaValida
+                    ? "Senha forte"
+                    : "Use 8+ caracteres, maiúscula, minúscula, número e símbolo"}
+                </Text>
+              )}
+
+              {/* BOTÃO */}
+              <TouchableOpacity
+                style={styles.button}
+                onPress={handleRegister}
+                disabled={loading}
+              >
+                {loading ? (
+                  <ActivityIndicator color="#fff" />
+                ) : (
+                  <Text style={styles.buttonText}>Criar conta</Text>
+                )}
+              </TouchableOpacity>
+
+              <TouchableOpacity onPress={() => router.back()}>
+                <Text style={styles.link}>Já tem conta? Entrar</Text>
+              </TouchableOpacity>
+            </View>
+          </ScrollView>
+        </KeyboardAvoidingView>
+      </LinearGradient>
     </SafeAreaView>
   );
 }
@@ -181,15 +220,14 @@ export default function RegisterScreen() {
 const styles = StyleSheet.create({
   flex: { flex: 1 },
 
-  safeArea: {
-    flex: 1,
-    backgroundColor: "#0f172a",
-  },
+  safeArea: { flex: 1 },
+
+  gradient: { flex: 1 },
 
   scrollContainer: {
     flexGrow: 1,
     justifyContent: "center",
-    paddingHorizontal: 16,
+    paddingHorizontal: 20,
   },
 
   container: {
@@ -197,42 +235,42 @@ const styles = StyleSheet.create({
   },
 
   logo: {
-    fontSize: 24,
-    fontWeight: "bold",
+    fontSize: 28,
+    fontWeight: "700",
     color: "#fff",
     marginBottom: 6,
   },
 
   subtitle: {
-    color: "#94a3b8",
-    marginBottom: 20,
+    color: "#cbd5f5",
+    marginBottom: 28,
   },
 
   inputContainer: {
     flexDirection: "row",
     alignItems: "center",
     width: "100%",
-    backgroundColor: "#1e293b",
-    borderRadius: 10,
-    paddingHorizontal: 10,
-    marginBottom: 10,
+    backgroundColor: "rgba(255,255,255,0.08)",
+    borderRadius: 16,
+    paddingHorizontal: 14,
+    marginBottom: 14,
   },
 
   input: {
     flex: 1,
-    padding: 12,
+    padding: 14,
     color: "#fff",
   },
 
   feedback: {
     alignSelf: "flex-start",
     marginBottom: 10,
-    fontSize: 13,
+    fontSize: 12,
   },
 
   button: {
-    backgroundColor: "#971313",
-    borderRadius: 10,
+    backgroundColor: "#6366f1",
+    borderRadius: 16,
     width: "100%",
     paddingVertical: 14,
     marginTop: 10,
@@ -241,11 +279,13 @@ const styles = StyleSheet.create({
   buttonText: {
     color: "#fff",
     textAlign: "center",
-    fontWeight: "bold",
+    fontWeight: "600",
+    fontSize: 15,
   },
 
   link: {
-    color: "#94a3b8",
-    marginTop: 15,
+    color: "#cbd5f5",
+    marginTop: 18,
+    fontSize: 14,
   },
 });

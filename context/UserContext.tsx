@@ -1,7 +1,9 @@
-import React, { createContext, useState } from "react";
+import React, { createContext, ReactNode, useState } from "react";
 
 type UserType = {
+  uid: string;
   name: string;
+  email: string;
   bio: string;
 };
 
@@ -12,14 +14,19 @@ type UserContextType = {
 
 export const UserContext = createContext<UserContextType | null>(null);
 
-export function UserProvider({ children }: any) {
+export function UserProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<UserType>({
+    uid: "",
     name: "",
+    email: "",
     bio: "",
   });
 
   const updateUser = (data: Partial<UserType>) => {
-    setUser((prev) => ({ ...prev, ...data }));
+    setUser((prev) => ({
+      ...prev,
+      ...data,
+    }));
   };
 
   return (
